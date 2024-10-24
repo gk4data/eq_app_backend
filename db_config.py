@@ -1,16 +1,18 @@
-from databricks import sql
+# db_config.py
+import pyodbc
+import os
 
-def get_data_from_databricks():
-    connection = sql.connect(
-        server_hostname="adb-3222227712665162.2.azuredatabricks.net",
-        http_path="/sql/1.0/warehouses/c938a39859d227a8",
-        access_token="dapi7652ad8e5e7597f420c5769a8d88a0f5-3"
+
+def get_connection():
+    # Get environment variables (or hard-code the values if you prefer)
+    server = os.getenv('DB_SERVER', 'eq-news.database.windows.net')
+    database = os.getenv('DB_NAME', 'backend_eq_news')
+    username = os.getenv('DB_USER', 'eq_news_db')
+    password = os.getenv('DB_PASSWORD', 'Ganesh@139')
+    driver = '{SQL Server}'
+    
+    # Establish a connection to the Azure SQL database
+    connection = pyodbc.connect(
+        f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
     )
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM eq_sracpper.default.combined_news")
-    data = cursor.fetchall()
-    cursor.close()
-    connection.close()
-
-    columns = ['Headline', 'URL', 'Source', 'Datetime']
-    return [dict(zip(columns, row)) for row in data]
+    return connection
